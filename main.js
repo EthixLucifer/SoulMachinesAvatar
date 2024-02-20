@@ -101,9 +101,9 @@ function handleKeyPress(event) {
   const key = event.key || String.fromCharCode(event.keyCode);
   console.log('Key Code:', event.keyCode);
   console.log('Key Value:', key);
-  if (key === 'Enter') {
+  if (key === 'ArrowLeft') {
     stopSpeaking();
-  } else if (key === ' ') {
+  } else if (key === 'ArrowRight') {
     toggleUserMicrophone();
   }
 }
