@@ -1,22 +1,12 @@
 body {
   background-color: black;
-  height: 100vh;
-  margin: 0px;
 }
 
 .container {
     text-align: center;
-    display: flex;
-    height: 100vh;
 }
 
-.center, #viewer-iframe {
-  flex: 1;
-  border: 0;
-}
-
-.center {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+button {
+    position: absolute;
+    top: 50%;
 }

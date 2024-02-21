@@ -77,8 +77,7 @@ connectButton.addEventListener('click', () => {
     connect();
     connectButton.style.display = "none";
     video.style.height = "100%";
-    video.style.width = "125%";
-    // video.style.overflow = "auto";
+    video.style.width = "100%";
   }
 );
 
