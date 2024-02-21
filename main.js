@@ -78,6 +78,8 @@ connectButton.addEventListener('click', () => {
     connectButton.style.display = "none";
     video.style.height = "100%";
     video.style.width = "auto";
+    video.style.overflow = "hidden";
+    video.style.objectFit = "cover";
   }
 );
 
