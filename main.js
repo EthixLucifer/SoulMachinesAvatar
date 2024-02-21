@@ -97,15 +97,29 @@ function toggleUserMicrophone() {
   .catch((error) => console.log('microphone update failed: ', error));
 }
 
-function handleKeyPress(event) {
-  const key = event.key || String.fromCharCode(event.keyCode);
-  console.log('Key Code:', event.keyCode);
-  console.log('Key Value:', key);
-  if (key === 'ArrowLeft') {
-    stopSpeaking();
-  } else if (key === 'ArrowRight') {
-    toggleUserMicrophone();
-  }
-}
+// function handleKeyPress(event) {
+//   const key = event.key || String.fromCharCode(event.keyCode);
+//   console.log('Key Code:', event.keyCode);
+//   console.log('Key Value:', key);
+//   if (key === 'Enter') {
+//     stopSpeaking();
+//   } else if (key === ' ') {
+//     toggleUserMicrophone();
+//   }
+// }
 
-document.addEventListener('keydown', handleKeyPress);
+// document.addEventListener('keydown', handleKeyPress);
+
+document.addEventListener('DOMContentLoaded', function() {
+  const video = document.getElementById('sm-video');
+  video.addEventListener('contextmenu', function(event) {
+    event.preventDefault(); // Prevent default context menu behavior
+    toggleUserMicrophone();
+  });
+  video.addEventListener('click', function(event) {
+    console.log('Button Code:', event.button);
+    if (event.button === 0) { // Left mouse button clicked
+      stopSpeaking();
+    }
+  });
+});
