@@ -1,24 +1,9 @@
 body {
   background-color: black;
-  height: 100vh;
-  margin: 0px;
 }
 
 .container {
   text-align: center;
-  display: flex;
-  height: 100vh;
-}
-
-.center, video {
-  flex: 1;
-  border: 0;
-}
-
-.center {
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
 button {
