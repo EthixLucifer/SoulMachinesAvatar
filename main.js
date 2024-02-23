@@ -112,14 +112,15 @@ function toggleUserMicrophone() {
 
 document.addEventListener('DOMContentLoaded', function() {
   const video = document.getElementById('sm-video');
-  video.addEventListener('contextmenu', function(event) {
-    event.preventDefault(); // Prevent default context menu behavior
-    toggleUserMicrophone();
-  });
+  // video.addEventListener('contextmenu', function(event) {
+  //   event.preventDefault(); // Prevent default context menu behavior
+  //   toggleUserMicrophone();
+  // });
   video.addEventListener('click', function(event) {
     console.log('Button Code:', event.button);
     if (event.button === 0) { // Left mouse button clicked
       stopSpeaking();
+      toggleUserMicrophone();
     }
   });
 });
