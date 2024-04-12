@@ -6,6 +6,11 @@
 // this StackBlitz demo: 'https://web-platform-9chn6x.stackblitz.io'
 // Note that the URL will change if you fork this project
 import { Persona, Scene } from '@soulmachines/smwebsdk'
+import screenfull from 'screenfull';
+
+if (screenfull.isEnabled) {
+	screenfull.request();
+}
 
 let scene;
 

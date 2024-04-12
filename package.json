@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@soulmachines/smwebsdk": "^15.7.0",
+    "screenfull": "^6.0.2",
     "tslib": "^2.6.2"
   }
 }
