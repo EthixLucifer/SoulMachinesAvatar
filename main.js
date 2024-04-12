@@ -8,9 +8,13 @@
 import { Persona, Scene } from '@soulmachines/smwebsdk'
 import screenfull from 'screenfull';
 
-if (screenfull.isEnabled) {
-	screenfull.request();
-}
+const element = document.getElementById('target');
+
+document.getElementById('fullscreen-button').addEventListener('click', () => {
+	if (screenfull.isEnabled) {
+		screenfull.toggle(element, {navigationUI: 'hide'});
+	}
+});
 
 let scene;
 
