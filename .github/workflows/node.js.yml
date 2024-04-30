@@ -34,3 +34,8 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
           cname: avatar.hal51.ai
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
