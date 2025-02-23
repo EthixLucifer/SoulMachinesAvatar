@@ -135,6 +135,23 @@
 // });
 import { Persona, Scene } from '@soulmachines/smwebsdk';
 import screenfull from 'screenfull';
+import { initializeApp } from "firebase/app";
+import { getFirestore, collection, doc, setDoc } from "firebase/firestore";
+
+// Firebase Configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyDUEbNely3njV2q3waufu6vyp9AsPGj3VA",
+  authDomain: "hackx-7b82c.firebaseapp.com",
+  projectId: "hackx-7b82c",
+  storageBucket: "hackx-7b82c.appspot.com",
+  messagingSenderId: "256301486788",
+  appId: "1:256301486788:web:fcc661a891b815910fef91",
+  measurementId: "G-X82DBR2K5K"
+};
+
+// Initialize Firebase
+const firebaseApp = initializeApp(firebaseConfig);
+const db = getFirestore(firebaseApp);
 
 // DOM Elements
 const element = document.getElementById('target');
@@ -207,7 +224,9 @@ async function endCall() {
 
     const analysis = analyzeConversation();
     const formattedTranscript = formatTranscript();
-    saveTranscript(formattedTranscript, analysis);
+
+    // Save transcript to Firebase Firestore
+    await saveTranscriptToFirestore(formattedTranscript, analysis);
 
     console.log('Conversation Summary:\n', generateSummary(analysis));
     console.log('Full Transcript:\n', formattedTranscript);
@@ -217,6 +236,25 @@ async function endCall() {
     alert('Failed to end call properly');
   } finally {
     resetInterface();
+  }
+}
+
+// Save Transcript to Firebase Firestore
+async function saveTranscriptToFirestore(formattedTranscript, analysis) {
+  try {
+    const userEmail = "chetandagajipatil333@gmail.com"; // Replace with dynamic user email if needed
+    const reportsCollection = collection(db, "users", userEmail, "reports");
+    const reportDoc = doc(reportsCollection);
+
+    await setDoc(reportDoc, {
+      transcript: formattedTranscript,
+      analysis: analysis,
+      timestamp: new Date().toISOString()
+    });
+
+    console.log("Transcript successfully saved to Firestore");
+  } catch (error) {
+    console.error("Error saving transcript to Firestore:", error);
   }
 }
 
@@ -365,25 +403,6 @@ function cleanupMediaStreams() {
   if (videoElement.srcObject) {
     videoElement.srcObject.getTracks().forEach(track => track.stop());
     videoElement.srcObject = null;
-  }
-}
-
-function saveTranscript(formatted, analysis) {
-  try {
-    // Local Storage
-    localStorage.setItem('conversation-raw', JSON.stringify(transcript));
-    localStorage.setItem('conversation-formatted', formatted);
-    localStorage.setItem('conversation-analysis', JSON.stringify(analysis));
-
-    // Server Submission (uncomment to enable)
-    // fetch('/api/conversations', {
-    //     method: 'POST',
-    //     headers: {'Content-Type': 'application/json'},
-    //     body: JSON.stringify({ transcript, formatted, analysis })
-    // });
-
-  } catch (error) {
-    console.error('Saving failed:', error);
   }
 }
 
