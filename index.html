@@ -1,33 +1,117 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DSGE8BDCKM"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
 
-      gtag('config', 'G-DSGE8BDCKM');
-    </script>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <meta name="description" content="Hal51.AI Guru" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <link rel="manifest" href="/manifest.json" />
-    <title>Hal51.AI Guru</title>
-    <link rel="stylesheet" href="/style.css" />
-    <script type="module" src="/main.js"></script>
-  </head>
-  <body id="target">
-    <div class="container">
-      <div class="center">
-        <button id="connect-button">Connect</button>
-      </div>
-      <video id="sm-video" webkit-playsinline="true" playsinline="true" playsinline webkit-playsinline></video>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <meta name="description" content="Hal51.AI Guru" />
+  <title>Hal51.AI Guru</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #ffffff;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+      gap: 16px;
+    }
+
+    #sm-video {
+      flex: 1;
+      background: #f8f9fa;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      min-height: 200px;
+    }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      padding: 8px;
+    }
+
+    button {
+      background: #8A2BE2;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      flex: 1;
+      max-width: 200px;
+    }
+
+    button:hover {
+      background: #7B1FA2;
+      transform: translateY(-1px);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    #fullscreen-button {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(138, 43, 226, 0.9);
+      width: 48px;
+      height: 48px;
+      border-radius: 24px;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    #fullscreen-button svg {
+      width: 24px;
+      height: 24px;
+    }
+
+   
+
+    button {
+      /* Keep existing styles */
+      opacity: 1;
+      transition: opacity 0.3s ease;
+    }
+
+
+  </style>
+</head>
+
+<body id="target">
+  <div class="container">
+    <video id="sm-video" webkit-playsinline playsinline></video>
+    <div class="controls">
+      <button id="connect-button">Connect</button>
+      <button id="end-call-button">End Call</button>
     </div>
-    <button id="fullscreen-button"><svg height="24" viewBox="0 0 24 24" width="24"><path fill="none"></path><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" fill="white"></path></svg></button>
-  </body>
+  </div>
+  <button id="fullscreen-button">
+    <svg viewBox="0 0 24 24" fill="white">
+      <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" />
+    </svg>
+  </button>
+  <script type="module" src="/main.js"></script>
+</body>
+
 </html>
