@@ -164,7 +164,7 @@ async function connect() {
     conversationStartTime = new Date();
     // In your Scene configuration, add CORS headers
     scene = new Scene({
-      apiKey: "eyJzb3VsSWQiOiJkZG5hLXJvaGl0LWphbWJodWxrYXItb3JnLS1tdWx0aWxhbmd1YWdlIiwiYXV0aFNlcnZlciI6Imh0dHBzOi8vZGguc291bG1hY2hpbmVzLmNsb3VkL2FwaS9qd3QiLCJhdXRoVG9rZW4iOiJhcGlrZXlfdjFfODgyNTY0YTYtMGQxNy00YWE0LThiMTMtM2MwYjgxN2NhMDQ3In0=",
+      apiKey: "eyJzb3VsSWQiOiJkZG5hLXJvaGl0LWphbWJodWxrYXItb3JnLS1tdWx0aWxhbmd1YWdlIiwiYXV0aFNlcnZlciI6Imh0dHBzOi8vZGguc291bG1hY2hpbmVzLmNsb3VkL2FwaS9qd3QiLCJhdXRoVG9rZW4iOiJhcGlrZXlfdjFfZGYwMGExY2MtZjVmNy00MTFhLWJlM2ItZGQ0ZTJkZDQ5MTdmIn0=",
       videoElement: videoElement,
       requestedMediaDevices: { microphone: true, camera: true },
       requiredMediaDevices: { microphone: true, camera: true },
