@@ -137,6 +137,7 @@ import { Persona, Scene } from '@soulmachines/smwebsdk';
 import screenfull from 'screenfull';
 import { initializeApp } from "firebase/app";
 import { getFirestore, collection, doc, setDoc } from "firebase/firestore";
+// import fetch from 'node-fetch';
 
 // Firebase Configuration
 const firebaseConfig = {
@@ -152,6 +153,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const firebaseApp = initializeApp(firebaseConfig);
 const db = getFirestore(firebaseApp);
+const API = "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";
 
 // DOM Elements
 const element = document.getElementById('target');
@@ -223,7 +225,69 @@ async function endCall() {
     cleanupMediaStreams();
 
     const analysis = analyzeConversation();
-    const formattedTranscript = formatTranscript();
+
+
+
+    const rawTranscript = formatTranscript(); //grok fetcheing
+    const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";  // ✅ Correct URL
+
+
+    async function enhanceTranscript(transcript) {
+      try {
+        const response = await fetch(GROQ_API_URL, {  // Use the correct URL
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${API}`
+          },
+          body: JSON.stringify({
+            model: "mixtral-8x7b-32768",
+            messages: [
+              { role: "system", content: "You are a virtual health assistant trained to conduct preliminary health assessments based on user input. give detailed descriptions to explain the user's symptoms, medical history, and lifestyle. Provide an analysis of possible health concerns while clearly stating that this is not a medical diagnosis. Suggest whether the user should seek medical attention and recommend general wellness advice based on their symptoms. Keep your responses clear, concise, and reassuring. " },
+              { role: "user", content: `Enhance the following transcript: and also remove the timestamp, it looks unprofessional \n\n${transcript}` }
+            ]
+          })
+        });
+
+        if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+
+        const data = await response.json();
+        return data?.choices?.[0]?.message?.content?.trim() || transcript;
+
+      } catch (error) {
+        console.error("Groq API Error:", error);
+        return transcript; // Return original transcript if enhancement fails
+      }
+    }
+
+  //   async function enhanceTranscript(formattedTranscript) {
+  //     try {
+  //         const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+  //             method: "POST",
+  //             headers: {
+  //                 "Authorization": `Bearer ${API_KEY}`,  // ✅ Ensure the API key is correct
+  //                 "Content-Type": "application/json"
+  //             },
+  //             body: JSON.stringify({
+  //                 model: "llama3-8b-8192",
+  //                 messages: [{ role: "user", content: `Enhance this transcript: ${formattedTranscript}` }]
+  //             })
+  //         });
+  
+  //         if (!response.ok) {
+  //             throw new Error(`HTTP Error: ${response.status}`);
+  //         }
+  
+  //         const data = await response.json();
+  //         return data.choices[0].message.content;  // ✅ Extract the enhanced text
+  
+  //     } catch (error) {
+  //         console.error("Groq API Error:", error);
+  //         return formattedTranscript;  // Return original if API fails
+  //     }
+  // }
+
+    const formattedTranscript = await enhanceTranscript(rawTranscript);
 
     // Save transcript to Firebase Firestore
     await saveTranscriptToFirestore(formattedTranscript, analysis);
@@ -243,15 +307,21 @@ async function endCall() {
 async function saveTranscriptToFirestore(formattedTranscript, analysis) {
   try {
     const userEmail = "chetandagajipatil333@gmail.com"; // Replace with dynamic user email if needed
+    // const reportsCollection = collection(db, "users", userEmail, "reports");
+    // const reportDoc = doc(reportsCollection);
+
+    // await setDoc(reportDoc, {
+    //   name: formattedTranscript,
+    //   id: reportsCollection
+    // });
+
     const reportsCollection = collection(db, "users", userEmail, "reports");
-    const reportDoc = doc(reportsCollection);
+    const reportDoc = doc(reportsCollection); // Generates a unique document ID
 
     await setDoc(reportDoc, {
-      transcript: formattedTranscript,
-      analysis: analysis,
-      timestamp: new Date().toISOString()
+      name: formattedTranscript,   // ✅ Store transcript text
+      id: reportDoc.id             // ✅ Store document ID as a string
     });
-
     console.log("Transcript successfully saved to Firestore");
   } catch (error) {
     console.error("Error saving transcript to Firestore:", error);
