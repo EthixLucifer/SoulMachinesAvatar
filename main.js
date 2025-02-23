@@ -155,196 +155,203 @@ endCallButton.setAttribute('aria-disabled', 'true');
 
 // Fullscreen Handler
 document.getElementById('fullscreen-button').addEventListener('click', () => {
-    screenfull.isEnabled && screenfull.toggle(element, { navigationUI: 'hide' });
+  screenfull.isEnabled && screenfull.toggle(element, { navigationUI: 'hide' });
 });
 
 // Connection Handler
 async function connect() {
-    try {
-        conversationStartTime = new Date();
-        scene = new Scene({
-            apiKey: import.meta.env.VITE_SM_API_KEY,
-            videoElement: videoElement,
-            requestedMediaDevices: { microphone: true, camera: true },
-            requiredMediaDevices: { microphone: true, camera: true },
-        });
+  try {
+    conversationStartTime = new Date();
+    // In your Scene configuration, add CORS headers
+    scene = new Scene({
+      apiKey: "eyJzb3VsSWQiOiJkZG5hLXJvaGl0LWphbWJodWxrYXItb3JnLS1tdWx0aWxhbmd1YWdlIiwiYXV0aFNlcnZlciI6Imh0dHBzOi8vZGguc291bG1hY2hpbmVzLmNsb3VkL2FwaS9qd3QiLCJhdXRoVG9rZW4iOiJhcGlrZXlfdjFfODgyNTY0YTYtMGQxNy00YWE0LThiMTMtM2MwYjgxN2NhMDQ3In0=",
+      videoElement: videoElement,
+      requestedMediaDevices: { microphone: true, camera: true },
+      requiredMediaDevices: { microphone: true, camera: true },
+      connectionOptions: {
+        headers: {
+          'Access-Control-Allow-Origin': 'https://soul-machines-avatar.vercel.app',
+          'Vary': 'Origin'
+        }
+      }
+    });
 
-        await scene.connect();
-        persona = new Persona(scene, PERSONA_ID);
-        await persona.conversationSend('', {}, { kind: "init" });
-        await scene.startVideo();
+    await scene.connect();
+    persona = new Persona(scene, PERSONA_ID);
+    await persona.conversationSend('', {}, { kind: "init" });
+    await scene.startVideo();
 
-        // UI Updates
-        videoElement.muted = false;
-        connectButton.setAttribute('aria-disabled', 'true');
-        endCallButton.setAttribute('aria-disabled', 'false');
-        videoElement.style.height = "100%";
-        videoElement.style.width = "100%";
+    // UI Updates
+    videoElement.muted = false;
+    connectButton.setAttribute('aria-disabled', 'true');
+    endCallButton.setAttribute('aria-disabled', 'false');
+    videoElement.style.height = "100%";
+    videoElement.style.width = "100%";
 
-        setupConversationListeners();
+    setupConversationListeners();
 
-    } catch (error) {
-        console.error('Connection Error:', error);
-        alert(`Connection failed: ${error.message || 'Unknown error'}`);
-        resetInterface();
-    }
+  } catch (error) {
+    console.error('Connection Error:', error);
+    alert(`Connection failed: ${error.message || 'Unknown error'}`);
+    resetInterface();
+  }
 }
 
 // Disconnection Handler
 async function endCall() {
-    if (!scene?.isConnected()) return;
+  if (!scene?.isConnected()) return;
 
-    try {
-        await scene.disconnect();
-        cleanupMediaStreams();
-        
-        const analysis = analyzeConversation();
-        const formattedTranscript = formatTranscript();
-        saveTranscript(formattedTranscript, analysis);
-        
-        console.log('Conversation Summary:\n', generateSummary(analysis));
-        console.log('Full Transcript:\n', formattedTranscript);
+  try {
+    await scene.disconnect();
+    cleanupMediaStreams();
 
-    } catch (error) {
-        console.error('Disconnection Error:', error);
-        alert('Failed to end call properly');
-    } finally {
-        resetInterface();
-    }
+    const analysis = analyzeConversation();
+    const formattedTranscript = formatTranscript();
+    saveTranscript(formattedTranscript, analysis);
+
+    console.log('Conversation Summary:\n', generateSummary(analysis));
+    console.log('Full Transcript:\n', formattedTranscript);
+
+  } catch (error) {
+    console.error('Disconnection Error:', error);
+    alert('Failed to end call properly');
+  } finally {
+    resetInterface();
+  }
 }
 
 // Conversation Tracking
 function setupConversationListeners() {
-    // AI Speech Tracking
-    scene.onStateEvent.addListener((_, event) => {
-        const state = event.persona?.[PERSONA_ID];
-        if (state?.speechState === 'speaking') {
-            addTranscriptEntry({
-                source: 'AI',
-                text: state.currentSpeech,
-                type: 'speech',
-                timestamp: new Date()
-            });
-        }
-    });
+  // AI Speech Tracking
+  scene.onStateEvent.addListener((_, event) => {
+    const state = event.persona?.[PERSONA_ID];
+    if (state?.speechState === 'speaking') {
+      addTranscriptEntry({
+        source: 'AI',
+        text: state.currentSpeech,
+        type: 'speech',
+        timestamp: new Date()
+      });
+    }
+  });
 
-    // User Speech Tracking
-    scene.onRecognizeResultsEvent.addListener((_, status, __, results) => {
-        if (status === 'success' && results[0]?.final) {
-            addTranscriptEntry({
-                source: 'User',
-                text: results[0].alternatives[0].transcript,
-                type: 'speech',
-                confidence: results[0].alternatives[0].confidence,
-                timestamp: new Date()
-            });
-        }
-    });
+  // User Speech Tracking
+  scene.onRecognizeResultsEvent.addListener((_, status, __, results) => {
+    if (status === 'success' && results[0]?.final) {
+      addTranscriptEntry({
+        source: 'User',
+        text: results[0].alternatives[0].transcript,
+        type: 'speech',
+        confidence: results[0].alternatives[0].confidence,
+        timestamp: new Date()
+      });
+    }
+  });
 
-    // Text Input Tracking
-    document.getElementById('text-message-input')?.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            const input = e.target;
-            const text = input.value.trim();
-            if (text) {
-                addTranscriptEntry({
-                    source: 'User',
-                    text: text,
-                    type: 'text',
-                    timestamp: new Date()
-                });
-                persona.conversationSend(text, {}, {});
-                input.value = '';
-            }
-        }
-    });
+  // Text Input Tracking
+  document.getElementById('text-message-input')?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      const input = e.target;
+      const text = input.value.trim();
+      if (text) {
+        addTranscriptEntry({
+          source: 'User',
+          text: text,
+          type: 'text',
+          timestamp: new Date()
+        });
+        persona.conversationSend(text, {}, {});
+        input.value = '';
+      }
+    }
+  });
 }
 
 // Transcript Management
 function addTranscriptEntry(entry) {
-    transcript.push({
-        ...entry,
-        timestamp: entry.timestamp.toISOString()
-    });
+  transcript.push({
+    ...entry,
+    timestamp: entry.timestamp.toISOString()
+  });
 }
 
 function formatTranscript() {
-    return transcript.map((entry, index) => {
-        const time = new Date(entry.timestamp).toLocaleTimeString();
-        return `[${time}] ${entry.source}: ${entry.text}${entry.type === 'speech' ? ' (Voice)' : ' (Text)'}`;
-    }).join('\n');
+  return transcript.map((entry, index) => {
+    const time = new Date(entry.timestamp).toLocaleTimeString();
+    return `[${time}] ${entry.source}: ${entry.text}${entry.type === 'speech' ? ' (Voice)' : ' (Text)'}`;
+  }).join('\n');
 }
 
 // Analysis Functions
 function analyzeConversation() {
-    const userEntries = transcript.filter(entry => entry.source === 'User');
-    const aiEntries = transcript.filter(entry => entry.source === 'AI');
-    
-    return {
-        duration: new Date() - conversationStartTime,
-        totalExchanges: transcript.length,
-        user: {
-            textInputs: userEntries.filter(e => e.type === 'text').length,
-            voiceInputs: userEntries.filter(e => e.type === 'speech').length,
-            averageConfidence: calculateAverageConfidence(userEntries)
-        },
-        ai: {
-            averageResponseTime: calculateAverageResponseTime(),
-            responses: aiEntries.length
-        },
-        topics: detectTopics()
-    };
+  const userEntries = transcript.filter(entry => entry.source === 'User');
+  const aiEntries = transcript.filter(entry => entry.source === 'AI');
+
+  return {
+    duration: new Date() - conversationStartTime,
+    totalExchanges: transcript.length,
+    user: {
+      textInputs: userEntries.filter(e => e.type === 'text').length,
+      voiceInputs: userEntries.filter(e => e.type === 'speech').length,
+      averageConfidence: calculateAverageConfidence(userEntries)
+    },
+    ai: {
+      averageResponseTime: calculateAverageResponseTime(),
+      responses: aiEntries.length
+    },
+    topics: detectTopics()
+  };
 }
 
 function calculateAverageResponseTime() {
-    let responseTimes = [];
-    let lastUserTime;
+  let responseTimes = [];
+  let lastUserTime;
 
-    transcript.forEach(entry => {
-        if (entry.source === 'User') {
-            lastUserTime = new Date(entry.timestamp);
-        }
-        if (entry.source === 'AI' && lastUserTime) {
-            responseTimes.push(new Date(entry.timestamp) - lastUserTime);
-            lastUserTime = null;
-        }
-    });
+  transcript.forEach(entry => {
+    if (entry.source === 'User') {
+      lastUserTime = new Date(entry.timestamp);
+    }
+    if (entry.source === 'AI' && lastUserTime) {
+      responseTimes.push(new Date(entry.timestamp) - lastUserTime);
+      lastUserTime = null;
+    }
+  });
 
-    return responseTimes.length > 0 
-        ? responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length 
-        : 0;
+  return responseTimes.length > 0
+    ? responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length
+    : 0;
 }
 
 function detectTopics() {
-    const keywordMap = {
-        account: ['login', 'password', 'sign in', 'account'],
-        payments: ['payment', 'invoice', 'billing', 'charge'],
-        technical: ['error', 'bug', 'issue', 'problem']
-    };
+  const keywordMap = {
+    account: ['login', 'password', 'sign in', 'account'],
+    payments: ['payment', 'invoice', 'billing', 'charge'],
+    technical: ['error', 'bug', 'issue', 'problem']
+  };
 
-    return Object.entries(keywordMap).reduce((acc, [category, keywords]) => {
-        const matches = transcript.filter(entry => 
-            keywords.some(keyword => 
-                entry.text.toLowerCase().includes(keyword)
-            )
-        );
-        if (matches.length > 0) acc[category] = matches.length;
-        return acc;
-    }, {});
+  return Object.entries(keywordMap).reduce((acc, [category, keywords]) => {
+    const matches = transcript.filter(entry =>
+      keywords.some(keyword =>
+        entry.text.toLowerCase().includes(keyword)
+      )
+    );
+    if (matches.length > 0) acc[category] = matches.length;
+    return acc;
+  }, {});
 }
 
 function calculateAverageConfidence(entries) {
-    const confidences = entries
-        .filter(e => typeof e.confidence === 'number')
-        .map(e => e.confidence);
-    return confidences.length > 0 
-        ? confidences.reduce((a, b) => a + b, 0) / confidences.length 
-        : null;
+  const confidences = entries
+    .filter(e => typeof e.confidence === 'number')
+    .map(e => e.confidence);
+  return confidences.length > 0
+    ? confidences.reduce((a, b) => a + b, 0) / confidences.length
+    : null;
 }
 
 // Utility Functions
 function generateSummary(analysis) {
-    return `
+  return `
     Conversation Summary:
     Duration: ${Math.round(analysis.duration / 1000 / 60)} minutes
     Total Exchanges: ${analysis.totalExchanges}
@@ -355,37 +362,37 @@ function generateSummary(analysis) {
 }
 
 function cleanupMediaStreams() {
-    if (videoElement.srcObject) {
-        videoElement.srcObject.getTracks().forEach(track => track.stop());
-        videoElement.srcObject = null;
-    }
+  if (videoElement.srcObject) {
+    videoElement.srcObject.getTracks().forEach(track => track.stop());
+    videoElement.srcObject = null;
+  }
 }
 
 function saveTranscript(formatted, analysis) {
-    try {
-        // Local Storage
-        localStorage.setItem('conversation-raw', JSON.stringify(transcript));
-        localStorage.setItem('conversation-formatted', formatted);
-        localStorage.setItem('conversation-analysis', JSON.stringify(analysis));
+  try {
+    // Local Storage
+    localStorage.setItem('conversation-raw', JSON.stringify(transcript));
+    localStorage.setItem('conversation-formatted', formatted);
+    localStorage.setItem('conversation-analysis', JSON.stringify(analysis));
 
-        // Server Submission (uncomment to enable)
-        // fetch('/api/conversations', {
-        //     method: 'POST',
-        //     headers: {'Content-Type': 'application/json'},
-        //     body: JSON.stringify({ transcript, formatted, analysis })
-        // });
+    // Server Submission (uncomment to enable)
+    // fetch('/api/conversations', {
+    //     method: 'POST',
+    //     headers: {'Content-Type': 'application/json'},
+    //     body: JSON.stringify({ transcript, formatted, analysis })
+    // });
 
-    } catch (error) {
-        console.error('Saving failed:', error);
-    }
+  } catch (error) {
+    console.error('Saving failed:', error);
+  }
 }
 
 function resetInterface() {
-    connectButton.setAttribute('aria-disabled', 'false');
-    endCallButton.setAttribute('aria-disabled', 'true');
-    videoElement.style.backgroundColor = '#f8f9fa';
-    transcript = [];
-    conversationStartTime = null;
+  connectButton.setAttribute('aria-disabled', 'false');
+  endCallButton.setAttribute('aria-disabled', 'true');
+  videoElement.style.backgroundColor = '#f8f9fa';
+  transcript = [];
+  conversationStartTime = null;
 }
 
 // Event Listeners
