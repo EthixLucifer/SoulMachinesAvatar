@@ -1,12 +1,12 @@
+import { defineConfig } from 'vite';
+
 export default defineConfig({
-    server: {
-        proxy: {
-            '/api': {
-                target: 'https://dh.soulmachines.cloud',
-                changeOrigin: true,
-                secure: true,
-                rewrite: (path) => path.replace(/^\/api/, '')
-            }
-        }
-    }
+  build: {
+    outDir: 'dist',
+    emptyOutDir: true,
+  },
+  server: {
+    open: true,
+    port: 3000
+  }
 });
